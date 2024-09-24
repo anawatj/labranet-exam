@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: labranet-reservations-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: labranet-reservations
+  template:
+    metadata:
+      labels: 
+        app: labranet-reservations
+    spec:
+      containers:
+        - name: labranet-reservations
+          image: anawatj/labranet-reservations
+          env:
+            - name: MONGO_URI
+              value: 'mongodb://labranet-reservations-mongo-srv:27017/reservations'
+            #- name: JWT_SECRET
+            #  valueFrom:
+            #    secretKeyRef:
+            #      name: jwt-secret
+            #      key: JWT_SECRET
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: labranet-reservations-srv
+spec:
+  selector:
+    app: labranet-reservations
+  ports:
+    - name: labranet-reservations
+      protocol: TCP
+      port: 8000
+      targetPort: 8000

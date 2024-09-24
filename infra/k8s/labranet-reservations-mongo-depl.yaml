@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: labranet-reservations-mongo-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: labranet-reservations-mongo
+  template:
+    metadata:
+      labels:
+        app: labranet-reservations-mongo
+    spec:
+      containers:
+        - name: labranet-reservations-mongo
+          image: mongo
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: labranet-reservations-mongo-srv
+spec:
+  selector:
+    app: labranet-reservations-mongo
+  ports:
+    - name: db
+      protocol: TCP
+      port: 27017
+      targetPort: 27017

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: labranet-auth-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: labranet-auth
+  template:
+    metadata:
+      labels: 
+        app: labranet-auth
+    spec:
+      containers:
+        - name: labranet-auth
+          image: anawatj/labranet-auth
+          env:
+            - name: MONGO_URI
+              value: 'mongodb://labranet-auth-mongo-srv:27017/auth'
+            #- name: JWT_SECRET
+            #  valueFrom:
+            #    secretKeyRef:
+            #      name: jwt-secret
+            #      key: JWT_SECRET
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: labranet-auth-srv
+spec:
+  selector:
+    app: labranet-auth
+  ports:
+    - name: labranet-auth
+      protocol: TCP
+      port: 8000
+      targetPort: 8000

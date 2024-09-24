@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: labranet-auth-mongo-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: labranet-auth-mongo
+  template:
+    metadata:
+      labels:
+        app: labranet-auth-mongo
+    spec:
+      containers:
+        - name: labranet-auth-mongo
+          image: mongo
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: labranet-auth-mongo-srv
+spec:
+  selector:
+    app: labranet-auth-mongo
+  ports:
+    - name: db
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
