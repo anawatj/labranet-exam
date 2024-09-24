@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use chrono::DateTime;
 use labranet_common::{
     jwt::JWT,
     response::{Response, ResponseBody, ResponseError, ResponseErrorBody},
@@ -54,10 +55,20 @@ impl ReservationUseCase {
         ReservationUseCase { repo }
     }
     fn validate_reservation(&self, model: ReservationModel) -> Vec<String> {
-        let errors = [match model.reservation_name == "" {
-            true => Some("Reservation name is required".to_string()),
-            false => None,
-        }]
+        let errors = [
+            match model.reservation_name == "" {
+                true => Some("Reservation name is required".to_string()),
+                false => None,
+            },
+            match model.description == ""{
+                true=> Some("Description is required".to_string()),
+                false=>None
+            },
+            match model.items.is_empty() {
+                true => Some("Reservation Item is required".to_string()),
+                false => None,
+            },
+        ]
         .to_vec();
         errors
             .iter()
@@ -250,27 +261,31 @@ impl ReservationUseCaseTrait for ReservationUseCase {
                             .await;
                         match result {
                             Some(reservation_db) => {
-                                let reservation=Reservation{
-                                    _id:reservation_db._id,
-                                    reservation_name:model.reservation_name,
-                                    description:model.description,
-                                    reservation_date:model.reservation_date,
-                                    reservation_status:ReservationStatus::Save.to_string(),
-                                    reservation_start_date:model.reservation_start_date,
-                                    reservation_end_date:model.reservation_end_date,
-                                    items:model.items.iter().map(|item|ReservationItem{
-                                        price:item.clone().price,
-                                        room:item.clone().room
-                                    }).collect::<Vec<ReservationItem>>(),
-                                    created_by:reservation_db.created_by
+                                let reservation = Reservation {
+                                    _id: reservation_db._id,
+                                    reservation_name: model.reservation_name,
+                                    description: model.description,
+                                    reservation_date: model.reservation_date,
+                                    reservation_status: ReservationStatus::Save.to_string(),
+                                    reservation_start_date: model.reservation_start_date,
+                                    reservation_end_date: model.reservation_end_date,
+                                    items: model
+                                        .items
+                                        .iter()
+                                        .map(|item| ReservationItem {
+                                            price: item.clone().price,
+                                            room: item.clone().room,
+                                        })
+                                        .collect::<Vec<ReservationItem>>(),
+                                    created_by: reservation_db.created_by,
                                 };
-                                self.repo.update(reservation,_id).await;
+                                self.repo.update(reservation, _id).await;
                                 let result = self.repo.find_one(reservation_db._id).await.unwrap();
                                 let response = Response {
                                     body: ResponseBody::<Reservation>::Data(result),
                                 };
                                 Ok(serde_json::to_string(&response).unwrap())
-                            },
+                            }
                             None => {
                                 let response = ResponseError {
                                     error: ResponseErrorBody::<String>::Error(
@@ -305,7 +320,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
         &self,
         key: Result<JWT, ResponseError<String>>,
         _id: String,
-    ) -> Result<String, Custom<String>>{
+    ) -> Result<String, Custom<String>> {
         match key {
             Ok(k) => {
                 let result = self
