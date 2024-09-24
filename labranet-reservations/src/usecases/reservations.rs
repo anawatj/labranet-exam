@@ -32,18 +32,18 @@ pub trait ReservationUseCaseTrait: Send + Sync {
     async fn fetch_one_reservation(
         &self,
         key: Result<JWT, ResponseError<String>>,
-        _id: String,
+        _id: &str,
     ) -> Result<String, Custom<String>>;
     async fn update_reservation(
         &self,
         key: Result<JWT, ResponseError<String>>,
         model: ReservationModel,
-        _id: String,
+        _id: &str,
     ) -> Result<String, Custom<String>>;
     async fn delete_reservation(
         &self,
         key: Result<JWT, ResponseError<String>>,
-        _id: String,
+        _id: &str,
     ) -> Result<String, Custom<String>>;
 }
 
@@ -190,13 +190,14 @@ impl ReservationUseCaseTrait for ReservationUseCase {
     async fn fetch_one_reservation(
         &self,
         key: Result<JWT, ResponseError<String>>,
-        _id: String,
+        _id: &str,
     ) -> Result<String, Custom<String>> {
         match key {
             Ok(k) => {
+               
                 let result = self
                     .repo
-                    .find_one(ObjectId::from_str(_id.as_str()).unwrap())
+                    .find_one(ObjectId::from_str(_id).expect("invalid id"))
                     .await;
                 match result {
                     Some(res) => {
@@ -237,7 +238,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
         &self,
         key: Result<JWT, ResponseError<String>>,
         model: ReservationModel,
-        _id: String,
+        _id: &str,
     ) -> Result<String, Custom<String>> {
         match key {
             Ok(k) => {
@@ -257,7 +258,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
                     false => {
                         let result = self
                             .repo
-                            .find_one(ObjectId::from_str(_id.clone().as_str()).unwrap())
+                            .find_one(ObjectId::from_str(_id).expect("invalid id"))
                             .await;
                         match result {
                             Some(reservation_db) => {
@@ -279,7 +280,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
                                         .collect::<Vec<ReservationItem>>(),
                                     created_by: reservation_db.created_by,
                                 };
-                                self.repo.update(reservation, _id).await;
+                                self.repo.update(reservation, ObjectId::from_str(_id).expect("invalid id")).await;
                                 let result = self.repo.find_one(reservation_db._id).await.unwrap();
                                 let response = Response {
                                     body: ResponseBody::<Reservation>::Data(result),
@@ -319,13 +320,13 @@ impl ReservationUseCaseTrait for ReservationUseCase {
     async fn delete_reservation(
         &self,
         key: Result<JWT, ResponseError<String>>,
-        _id: String,
+        _id: &str,
     ) -> Result<String, Custom<String>> {
         match key {
             Ok(k) => {
                 let result = self
                     .repo
-                    .find_one(ObjectId::from_str(_id.as_str()).unwrap())
+                    .find_one(ObjectId::from_str(_id).expect("invalid id"))
                     .await;
                 match result {
                     Some(res) => {

@@ -12,7 +12,7 @@ pub trait  ReservationRepoTrait : Send+Sync {
     async fn add(&self,reservation:Reservation)->InsertOneResult ;
     async fn find_all(&self)->Vec<Reservation>;
     async fn find_one(&self,_id:ObjectId)->Option<Reservation>;
-    async fn update(&self,reservation:Reservation,_id:String)->UpdateResult;
+    async fn update(&self,reservation:Reservation,_id:ObjectId)->UpdateResult;
     async fn delete(&self,_id:ObjectId)->DeleteResult;
 }
 pub struct ReservationRepo  {
@@ -60,12 +60,12 @@ impl ReservationRepoTrait for ReservationRepo{
         let result = col.find_one(doc! {"_id":_id}).await.unwrap();
         result
     }
-    async fn update(&self,reservation:Reservation,_id:String)->UpdateResult{
-        let id = ObjectId::from_str(_id.as_str()).expect("Cannot convert to id");
+    async fn update(&self,reservation:Reservation,_id:ObjectId)->UpdateResult{
+     
         let col = self.mongo.database.collection::<Reservation>("reservations");
         
         let items = Bson::from(reservation.items.iter().map(|item| Document::from(doc! {"price":item.clone().price,"room":item.clone().room})).collect::<Vec<Document>>());
-        let result = col.update_one(doc! {"_id":id}, doc!{"$set":doc!{
+        let result = col.update_one(doc! {"_id":_id}, doc!{"$set":doc!{
             "reservation_name":reservation.reservation_name,
             "description":reservation.description,
             "reservation_date":reservation.reservation_date,
