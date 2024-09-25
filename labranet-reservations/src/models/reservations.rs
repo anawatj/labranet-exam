@@ -24,7 +24,7 @@ pub struct ReservationItemModel {
 pub struct ReservationModel {
     pub reservation_name:String,
     pub description:String,
-    #[serde(with = "bson_datetime_as_rfc3339_string")]
+    #[serde(with="bson_datetime_as_rfc3339_string")]
     pub reservation_date:DateTime,
     pub items:Vec<ReservationItemModel> ,
     #[serde(with = "bson_datetime_as_rfc3339_string")]
