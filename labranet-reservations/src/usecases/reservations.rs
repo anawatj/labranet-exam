@@ -60,9 +60,9 @@ impl ReservationUseCase {
                 true => Some("Reservation name is required".to_string()),
                 false => None,
             },
-            match model.description == ""{
-                true=> Some("Description is required".to_string()),
-                false=>None
+            match model.description == "" {
+                true => Some("Description is required".to_string()),
+                false => None,
             },
             match model.items.is_empty() {
                 true => Some("Reservation Item is required".to_string()),
@@ -194,30 +194,43 @@ impl ReservationUseCaseTrait for ReservationUseCase {
     ) -> Result<String, Custom<String>> {
         match key {
             Ok(k) => {
-               
-                let result = self
-                    .repo
-                    .find_one(ObjectId::from_str(_id).expect("invalid id"))
-                    .await;
-                match result {
-                    Some(res) => {
-                        let response = Response {
-                            body: ResponseBody::<Reservation>::Data(res),
-                        };
-                        Ok(serde_json::to_string(&response).unwrap())
-                    }
-                    None => {
+                let id = ObjectId::parse_str(_id);
+                match id.clone().is_err() {
+                    true => {
                         let response = ResponseError {
-                            error: ResponseErrorBody::<String>::Error(
-                                "Not Found Reservations".to_string(),
-                            ),
+                            error: ResponseErrorBody::<String>::Error("Invalid id".to_string()),
                         };
                         Err(Custom(
                             Status {
-                                code: Status::NotFound.code,
+                                code: Status::BadRequest.code,
                             },
                             serde_json::to_string(&response).unwrap(),
                         ))
+                    }
+                    false => {
+                        println!("{}", id.clone().unwrap());
+                        let result = self.repo.find_one(id.clone().unwrap()).await;
+                        match result {
+                            Some(res) => {
+                                let response = Response {
+                                    body: ResponseBody::<Reservation>::Data(res),
+                                };
+                                Ok(serde_json::to_string(&response).unwrap())
+                            }
+                            None => {
+                                let response = ResponseError {
+                                    error: ResponseErrorBody::<String>::Error(
+                                        "Not Found Reservations".to_string(),
+                                    ),
+                                };
+                                Err(Custom(
+                                    Status {
+                                        code: Status::NotFound.code,
+                                    },
+                                    serde_json::to_string(&response).unwrap(),
+                                ))
+                            }
+                        }
                     }
                 }
             }
@@ -256,49 +269,66 @@ impl ReservationUseCaseTrait for ReservationUseCase {
                         ))
                     }
                     false => {
-                        let result = self
-                            .repo
-                            .find_one(ObjectId::from_str(_id).expect("invalid id"))
-                            .await;
-                        match result {
-                            Some(reservation_db) => {
-                                let reservation = Reservation {
-                                    _id: reservation_db._id,
-                                    reservation_name: model.reservation_name,
-                                    description: model.description,
-                                    reservation_date: model.reservation_date,
-                                    reservation_status: ReservationStatus::Save.to_string(),
-                                    reservation_start_date: model.reservation_start_date,
-                                    reservation_end_date: model.reservation_end_date,
-                                    items: model
-                                        .items
-                                        .iter()
-                                        .map(|item| ReservationItem {
-                                            price: item.clone().price,
-                                            room: item.clone().room,
-                                        })
-                                        .collect::<Vec<ReservationItem>>(),
-                                    created_by: reservation_db.created_by,
-                                };
-                                self.repo.update(reservation, ObjectId::from_str(_id).expect("invalid id")).await;
-                                let result = self.repo.find_one(reservation_db._id).await.unwrap();
-                                let response = Response {
-                                    body: ResponseBody::<Reservation>::Data(result),
-                                };
-                                Ok(serde_json::to_string(&response).unwrap())
-                            }
-                            None => {
+                        let id = ObjectId::parse_str(_id);
+                        match id.is_err() {
+                            true => {
                                 let response = ResponseError {
                                     error: ResponseErrorBody::<String>::Error(
-                                        "Not Found Reservations".to_string(),
+                                        "Invalid id".to_string(),
                                     ),
                                 };
                                 Err(Custom(
                                     Status {
-                                        code: Status::NotFound.code,
+                                        code: Status::BadRequest.code,
                                     },
                                     serde_json::to_string(&response).unwrap(),
                                 ))
+                            }
+                            false => {
+                                println!("{}", id.clone().unwrap());
+                                let result = self.repo.find_one(id.clone().unwrap()).await;
+                                match result {
+                                    Some(reservation_db) => {
+                                        let reservation = Reservation {
+                                            _id: reservation_db._id,
+                                            reservation_name: model.reservation_name,
+                                            description: model.description,
+                                            reservation_date: model.reservation_date,
+                                            reservation_status: ReservationStatus::Save.to_string(),
+                                            reservation_start_date: model.reservation_start_date,
+                                            reservation_end_date: model.reservation_end_date,
+                                            items: model
+                                                .items
+                                                .iter()
+                                                .map(|item| ReservationItem {
+                                                    price: item.clone().price,
+                                                    room: item.clone().room,
+                                                })
+                                                .collect::<Vec<ReservationItem>>(),
+                                            created_by: reservation_db.created_by,
+                                        };
+                                        self.repo.update(reservation, id.clone().unwrap()).await;
+                                        let result =
+                                            self.repo.find_one(reservation_db._id).await.unwrap();
+                                        let response = Response {
+                                            body: ResponseBody::<Reservation>::Data(result),
+                                        };
+                                        Ok(serde_json::to_string(&response).unwrap())
+                                    }
+                                    None => {
+                                        let response = ResponseError {
+                                            error: ResponseErrorBody::<String>::Error(
+                                                "Not Found Reservations".to_string(),
+                                            ),
+                                        };
+                                        Err(Custom(
+                                            Status {
+                                                code: Status::NotFound.code,
+                                            },
+                                            serde_json::to_string(&response).unwrap(),
+                                        ))
+                                    }
+                                }
                             }
                         }
                     }
@@ -324,30 +354,46 @@ impl ReservationUseCaseTrait for ReservationUseCase {
     ) -> Result<String, Custom<String>> {
         match key {
             Ok(k) => {
-                let result = self
-                    .repo
-                    .find_one(ObjectId::from_str(_id).expect("invalid id"))
-                    .await;
-                match result {
-                    Some(res) => {
-                        self.repo.delete(res._id).await;
-                        let response = Response {
-                            body: ResponseBody::<String>::Data("Delete Success".to_string()),
-                        };
-                        Ok(serde_json::to_string(&response).unwrap())
-                    }
-                    None => {
+                let id = ObjectId::parse_str(_id);
+                match id.is_err() {
+                    true => {
                         let response = ResponseError {
-                            error: ResponseErrorBody::<String>::Error(
-                                "Not Found Reservations".to_string(),
-                            ),
+                            error: ResponseErrorBody::<String>::Error("Invalid id".to_string()),
                         };
                         Err(Custom(
                             Status {
-                                code: Status::NotFound.code,
+                                code: Status::BadRequest.code,
                             },
                             serde_json::to_string(&response).unwrap(),
                         ))
+                    }
+                    false => {
+                        println!("{}", id.clone().unwrap());
+                        let result = self.repo.find_one(id.clone().unwrap()).await;
+                        match result {
+                            Some(res) => {
+                                self.repo.delete(res._id).await;
+                                let response = Response {
+                                    body: ResponseBody::<String>::Data(
+                                        "Delete Success".to_string(),
+                                    ),
+                                };
+                                Ok(serde_json::to_string(&response).unwrap())
+                            }
+                            None => {
+                                let response = ResponseError {
+                                    error: ResponseErrorBody::<String>::Error(
+                                        "Not Found Reservations".to_string(),
+                                    ),
+                                };
+                                Err(Custom(
+                                    Status {
+                                        code: Status::NotFound.code,
+                                    },
+                                    serde_json::to_string(&response).unwrap(),
+                                ))
+                            }
+                        }
                     }
                 }
             }
