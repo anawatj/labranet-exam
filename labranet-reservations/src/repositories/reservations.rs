@@ -68,10 +68,10 @@ impl ReservationRepoTrait for ReservationRepo{
         let result = col.update_one(doc! {"_id":_id}, doc!{"$set":doc!{
             "reservation_name":reservation.reservation_name,
             "description":reservation.description,
-            "reservation_date":reservation.reservation_date,
+           // "reservation_date":reservation.reservation_date,
             "reservation_status":reservation.reservation_status,
-            "reservation_start_date":reservation.reservation_start_date,
-            "reservation_end_date":reservation.reservation_end_date,
+           // "reservation_start_date":reservation.reservation_start_date,
+          //  "reservation_end_date":reservation.reservation_end_date,
             "items":items
         }}).await.unwrap();
         result

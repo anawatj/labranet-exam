@@ -289,6 +289,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
                                 let result = self.repo.find_one(id.clone().unwrap()).await;
                                 match result {
                                     Some(reservation_db) => {
+                                        println!("Update Id: {}",id.clone().unwrap());
                                         let reservation = Reservation {
                                             _id: reservation_db._id,
                                             reservation_name: model.reservation_name,
