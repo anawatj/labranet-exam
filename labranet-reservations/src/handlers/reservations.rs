@@ -1,5 +1,3 @@
-use std::result;
-
 use labranet_common::{jwt::JWT, response::ResponseError};
 use rocket::{delete, get, post, put, response::status::{Created, Custom}, serde::json::Json, State};
 
@@ -22,6 +20,7 @@ pub async fn fetch_one_reservation(reservation_use_case:&State<Box<dyn Reservati
 }
 #[put("/reservations/<reservation_id>",format="application/json",data="<reservation>")]
 pub async fn update_reservation(reservation_use_case:&State<Box<dyn ReservationUseCaseTrait>>,key:Result<JWT,ResponseError<String>>,reservation:Json<ReservationModel>,reservation_id:&str)->Result<String,Custom<String>>{
+    println!("Start Update {}",reservation_id);
     let result = reservation_use_case.update_reservation(key,reservation.into_inner(),reservation_id).await;
     result
 }
