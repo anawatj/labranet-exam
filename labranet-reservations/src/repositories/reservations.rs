@@ -3,6 +3,7 @@ use mongodb::bson::{doc, oid::ObjectId};
 use mongodb::results::{DeleteResult, InsertOneResult, UpdateResult};
 use rocket::async_trait;
 use rocket::futures::StreamExt;
+use serde::Serialize;
 use crate::{db::db::MongoDB, entities::reservations::Reservation};
 
 #[async_trait]
@@ -59,9 +60,13 @@ impl ReservationRepoTrait for ReservationRepo{
         result
     }
     async fn update(&self,reservation:Reservation,_id:ObjectId)->UpdateResult{
-        let reservation_date = DateTime::from_millis(reservation.reservation_date.timestamp_millis());
-        let reservation_start_date = DateTime::from_millis(reservation.reservation_start_date.timestamp_millis());
-        let reservation_end_date = DateTime::from_millis(reservation.reservation_end_date.timestamp_millis());
+
+        let reservation_date = DateTime::from(reservation.reservation_date);
+        let reservation_start_date = DateTime::from(reservation.reservation_start_date);
+        let reservation_end_date = DateTime::from(reservation.reservation_end_date);
+        println!("{}",reservation_date);
+        println!("{}",reservation_start_date);
+        println!("{}",reservation_end_date);
         let col = self.mongo.database.collection::<Reservation>("reservations");
         let items = Bson::from(reservation.items.iter().map(|item| Document::from(doc! {"price":item.clone().price,"room":item.clone().room})).collect::<Vec<Document>>());
         let result = col.update_one(doc! {"_id":_id}, doc!{"$set":doc!{
