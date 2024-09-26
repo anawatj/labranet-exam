@@ -61,21 +61,17 @@ impl ReservationRepoTrait for ReservationRepo{
     }
     async fn update(&self,reservation:Reservation,_id:ObjectId)->UpdateResult{
 
-        let reservation_date = DateTime::from(reservation.reservation_date);
-        let reservation_start_date = DateTime::from(reservation.reservation_start_date);
-        let reservation_end_date = DateTime::from(reservation.reservation_end_date);
-        println!("{}",reservation_date);
-        println!("{}",reservation_start_date);
-        println!("{}",reservation_end_date);
+        println!("{}",reservation.reservation_date.to_rfc3339_string());
+        
         let col = self.mongo.database.collection::<Reservation>("reservations");
         let items = Bson::from(reservation.items.iter().map(|item| Document::from(doc! {"price":item.clone().price,"room":item.clone().room})).collect::<Vec<Document>>());
         let result = col.update_one(doc! {"_id":_id}, doc!{"$set":doc!{
             "reservation_name":reservation.reservation_name,
             "description":reservation.description,
-            "reservation_date":reservation_date,
+            "reservation_date":reservation.reservation_date.to_rfc3339_string(),
             "reservation_status":reservation.reservation_status,
-            "reservation_start_date":reservation_start_date,
-            "reservation_end_date":reservation_end_date,
+            "reservation_start_date":reservation.reservation_start_date.to_rfc3339_string(),
+            "reservation_end_date":reservation.reservation_end_date.to_rfc3339_string(),
             "items":items
         }}).await.unwrap();
         result

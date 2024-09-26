@@ -1,8 +1,7 @@
 use core::fmt;
 use mongodb::bson::DateTime;
-use serde::{Deserialize, Serialize};
 use mongodb::bson::serde_helpers::bson_datetime_as_rfc3339_string;
-
+use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ReservationStatus{
     Save=1,
@@ -24,7 +23,7 @@ pub struct ReservationItemModel {
 pub struct ReservationModel {
     pub reservation_name:String,
     pub description:String,
-    #[serde(with="bson_datetime_as_rfc3339_string")]
+    #[serde(with = "bson_datetime_as_rfc3339_string")]
     pub reservation_date:DateTime,
     pub items:Vec<ReservationItemModel> ,
     #[serde(with = "bson_datetime_as_rfc3339_string")]
