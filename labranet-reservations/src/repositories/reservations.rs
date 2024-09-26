@@ -10,6 +10,7 @@ use crate::{db::db::MongoDB, entities::reservations::Reservation};
 pub trait  ReservationRepoTrait : Send+Sync {
     async fn add(&self,reservation:Reservation)->InsertOneResult ;
     async fn find_all(&self)->Vec<Reservation>;
+    async fn find_all_by_user(&self,user_id:ObjectId)->Vec<Reservation>;
     async fn find_one(&self,_id:ObjectId)->Option<Reservation>;
     async fn update(&self,reservation:Reservation,_id:ObjectId)->UpdateResult;
     async fn delete(&self,_id:ObjectId)->DeleteResult;
@@ -80,6 +81,18 @@ impl ReservationRepoTrait for ReservationRepo{
         let col = self.mongo.database.collection::<Reservation>("reservations");
         let result = col.delete_one(doc! {"_id":_id}).await.unwrap();
         result
+    }
+    async fn find_all_by_user(&self,user_id:ObjectId)->Vec<Reservation>{
+        let col = self.mongo.database.collection::<Reservation>("reservations");
+        let mut cursor = col.find(doc! {"created_by":user_id}).await.unwrap();
+        let mut results :Vec<Reservation>=Vec::new();
+        while let Some(result) = cursor.next().await {
+            if result.is_ok(){
+             results.push(result.unwrap());
+            }
+             
+         }
+         results
     }
     
 }
