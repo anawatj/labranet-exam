@@ -1,9 +1,9 @@
-use mongodb::bson::{Bson, Document,DateTime};
+use mongodb::bson::{Bson, Document};
 use mongodb::bson::{doc, oid::ObjectId};
 use mongodb::results::{DeleteResult, InsertOneResult, UpdateResult};
 use rocket::async_trait;
 use rocket::futures::StreamExt;
-use serde::Serialize;
+
 use crate::{db::db::MongoDB, entities::reservations::Reservation};
 
 #[async_trait]

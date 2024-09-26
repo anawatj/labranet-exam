@@ -1,6 +1,4 @@
 use std::str::FromStr;
-
-use chrono::DateTime;
 use labranet_common::{
     jwt::JWT,
     response::{Response, ResponseBody, ResponseError, ResponseErrorBody},
@@ -85,7 +83,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
         model: ReservationModel,
     ) -> Result<Created<String>, Custom<String>> {
         match key {
-            Ok(k) => {
+            Ok(_k) => {
                 let errors = self.validate_reservation(model.clone());
                 match errors.len() > 0 {
                     true => {
@@ -116,7 +114,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
                                     room: item.clone().room,
                                 })
                                 .collect::<Vec<ReservationItem>>(),
-                            created_by: ObjectId::from_str(k.claims.subject_id.as_str()).unwrap(),
+                            created_by: ObjectId::from_str(_k.claims.subject_id.as_str()).unwrap(),
                         };
                         let insert_result = self.repo.add(reservation).await;
                         let result = self
@@ -150,7 +148,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
         key: Result<JWT, ResponseError<String>>,
     ) -> Result<String, Custom<String>> {
         match key {
-            Ok(k) => {
+            Ok(_k) => {
                 let results = self.repo.find_all().await;
                 match results.len() == 0 {
                     true => {
@@ -193,7 +191,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
         _id: &str,
     ) -> Result<String, Custom<String>> {
         match key {
-            Ok(k) => {
+            Ok(_k) => {
                 let id = ObjectId::parse_str(_id);
                 match id.clone().is_err() {
                     true => {
@@ -254,7 +252,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
         _id: &str,
     ) -> Result<String, Custom<String>> {
         match key {
-            Ok(k) => {
+            Ok(_k) => {
                 let errors = self.validate_reservation(model.clone());
                 match errors.len() > 0 {
                     true => {
@@ -354,7 +352,7 @@ impl ReservationUseCaseTrait for ReservationUseCase {
         _id: &str,
     ) -> Result<String, Custom<String>> {
         match key {
-            Ok(k) => {
+            Ok(_k) => {
                 let id = ObjectId::parse_str(_id);
                 match id.is_err() {
                     true => {
