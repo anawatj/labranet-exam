@@ -2,7 +2,7 @@ use std::env;
 use mongodb::{ options::ClientOptions, Client, Database};
 use rocket::fairing::AdHoc;
 
-
+#[derive(Debug, Clone)]
 
 pub struct  MongoDB {
     pub(crate) database: Database,

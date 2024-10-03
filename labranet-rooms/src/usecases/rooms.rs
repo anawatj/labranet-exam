@@ -9,7 +9,7 @@ use rocket::{
     http::Status,
     response::status::{Created, Custom},
 };
-use std::{result, str::FromStr};
+use std::str::FromStr;
 
 use crate::{
     entities::{buildings::Building, floors::Floor, rooms::Room},
