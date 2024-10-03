@@ -24,3 +24,11 @@ build:
         manual:
           - src: "src/**/*.rs"
             dest: .
+    - image: anawatj/labranet-rooms
+      context: labranet-rooms
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.rs"
+            dest: .

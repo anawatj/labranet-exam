@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: labranet-rooms-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: labranet-rooms
+  template:
+    metadata:
+      labels: 
+        app: labranet-rooms
+    spec:
+      containers:
+        - name: labranet-rooms
+          image: anawatj/labranet-rooms
+          env:
+            - name: MONGO_URI
+              value: 'mongodb://labranet-rooms-mongo-srv:27017/rooms'
+            #- name: JWT_SECRET
+            #  valueFrom:
+            #    secretKeyRef:
+            #      name: jwt-secret
+            #      key: JWT_SECRET
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: labranet-rooms-srv
+spec:
+  selector:
+    app: labranet-rooms
+  ports:
+    - name: labranet-rooms
+      protocol: TCP
+      port: 8000
+      targetPort: 8000

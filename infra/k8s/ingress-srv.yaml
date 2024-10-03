@@ -31,5 +31,26 @@ spec:
                 name: labranet-reservations-srv
                 port:
                   number: 8000
+          - path: /api/v1/buildings/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: labranet-rooms-srv
+                port:
+                  number: 8000
+          - path: /api/v1/floors/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: labranet-rooms-srv
+                port:
+                  number: 8000
+          - path: /api/v1/rooms/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: labranet-rooms-srv
+                port:
+                  number: 8000
           
           
