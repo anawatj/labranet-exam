@@ -10,7 +10,7 @@ pub trait ReservationApprovePublish {
 
 impl  ReservationApprovePublish for Publisher {
     fn publish(&self,data:Vec<ReservationItem>) {
-        self.client.publish(&self.subject, serde_json::to_string(&data).unwrap().as_str().as_bytes())
+        self.client.publish(&self.subject, serde_json::to_string(&data).unwrap().as_str().as_bytes());
     }
     
 }
