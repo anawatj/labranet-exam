@@ -16,4 +16,5 @@ serde = "1.0.210"
 serde_json = "1.0.128"
 thiserror = "1.0.63"
 uuid = {version = "1.10.0",features = ["v5"]}
-labranet-common = "0.1.3"
+nats = "0.25.0"
+labranet-common = "0.1.5"
