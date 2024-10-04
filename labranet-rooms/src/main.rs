@@ -1,15 +1,9 @@
 #[macro_use]
 extern crate rocket;
-
-
-use std::env;
-
-use labranet_common::events::Listener;
 use labranet_common::response::ResponseError;
 use labranet_common::response::ResponseErrorBody;
 use labranet_rooms::db::db::connect;
 use labranet_rooms::db::db::MongoDB;
-use labranet_rooms::events::events::ReservationApproveListen;
 use labranet_rooms::handlers::rooms::delete_building;
 use labranet_rooms::handlers::rooms::delete_floor;
 use labranet_rooms::handlers::rooms::delete_room;
@@ -60,15 +54,12 @@ async fn rocket() -> _ {
         )
         .allow_credentials(true);
     let database = connect().await.unwrap();
-    let nats = nats::connect(env::var("NATS_URL").expect("nat url not config")).unwrap();
+   // let nats = nats::connect(env::var("NATS_URL").expect("nat url not config")).unwrap();
     let mongo = MongoDB::new(database);
     let building_repo:Box<dyn BuildingRepoTrait> = Box::new(BuildingRepo::new(mongo.clone()));
     let floor_repo:Box<dyn FloorRepoTrait> = Box::new(FloorRepo::new(mongo.clone()));
     let room_repo:Box<dyn RoomRepoTrait> = Box::new(RoomRepo::new(mongo.clone()));
-    let room_repo_listen:Box<dyn RoomRepoTrait> = Box::new(RoomRepo::new(mongo.clone()));
     let room_use_case :Box<dyn RoomUseCaseTrait> = Box::new(RoomUseCase::new(building_repo, floor_repo, room_repo));
-    let reservation_approve_listener :Box<dyn ReservationApproveListen> = Box::new(Listener::new(nats,"reservation:approve".to_string(), "reservation:approve".to_string()));
-    reservation_approve_listener.listen(room_repo_listen);
     rocket::build()
         .attach(Shield::default().enable(permission))
         .manage(room_use_case)
